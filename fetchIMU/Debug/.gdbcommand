@@ -1,0 +1,5 @@
+set sysroot /Users/wondercise/tizen-studio/tools/smart-build-interface/../../platforms/tizen-5.0/wearable/rootstraps/wearable-5.0-device.core
+set debug-file-directory /Users/wondercise/tizen-studio/tools/smart-build-interface/../../platforms/tizen-5.0/wearable/rootstraps/wearable-5.0-device.core/usr/lib/debug
+set solib-search-path /Users/wondercise/workspace/fetchIMU/Debug
+dir /Users/wondercise/tizen-studio/tools/smart-build-interface/../../platforms/tizen-5.0/wearable/rootstraps/wearable-5.0-device.core/usr/src/debug
+sharedlibrary
