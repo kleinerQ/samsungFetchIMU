@@ -3,7 +3,7 @@
 
 bool create_gatt_characteristic();
 bool add_gatt_descriptor_to_gatt_characteristic();
-bool set_gatt_characteristic_value(int value);
+bool set_gatt_characteristic_value(int value1, int value2, int value3);
 bool notify_gatt_characteristic_value_changed();
 bool get_gatt_characteristic_handle(bt_gatt_h *handle);
 

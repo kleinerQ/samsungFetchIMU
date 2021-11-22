@@ -22,7 +22,7 @@ typedef struct appdata {
 
 
 uint16_t RandomManufactureData;
-sensor_type_e sensor_type = SENSOR_HRM;
+sensor_type_e sensor_type = SENSOR_ACCELEROMETER;
 sensor_h sensor_handle = 0;
 const char *sensor_privilege = "http://tizen.org/privilege/healthinfo";
 
@@ -199,24 +199,26 @@ bool initialize_hrm_sensor()
 void heartRate_sensor_listener_event_callback(sensor_h sensor, sensor_event_s events[], void *user_data) {
 
 	appdata_s *ad = user_data;
-	int value = (int)events[0].values[0];
-	dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Function sensor_events_callback() output value = %d", __FILE__, __func__, __LINE__, value);
+	int value1 = (int)events[0].values[0];
+	int value2 = (int)events[0].values[1];
+	int value3 = (int)events[0].values[2];
+	dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Function sensor_events_callback() output value = %d", __FILE__, __func__, __LINE__, value1);
 
-	if (value < 0)
-	{
-		value = 0;
-		return;
-	}
+//	if (value < 0)
+//	{
+//		value = 0;
+//		return;
+//	}
 
 	char valueStr[10];
-	sprintf(valueStr, "%d bpm", value);
+	sprintf(valueStr, "%d, %d, %d", value1, value2, value3);
 	elm_object_text_set(ad->heartRateLabel, valueStr);
 
 
 
 
 
-	if(!set_gatt_characteristic_value(value))
+	if(!set_gatt_characteristic_value(value1, value2, value3))
 		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to update the value of a characteristic's GATT handle.", __FILE__, __func__, __LINE__);
 	else
 		dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in updating the value of a characteristic's GATT handle.", __FILE__, __func__, __LINE__);

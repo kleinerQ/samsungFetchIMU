@@ -2,6 +2,13 @@
 #include "bluetooth/gatt/characteristic.h"
 #include "bluetooth/gatt/descriptor.h"
 #include "bluetooth/le/advertiser.h"
+
+union B2I16
+{
+   int16_t i;
+   uint8_t    b[2];
+};
+
 bt_gatt_h gatt_characteristic_handle = 0;
 bool tmpFlag = false;
 void gatt_characteristic_notification_sent_callback(int result, const char *remote_address, bt_gatt_server_h server, bt_gatt_h characteristic, bool completed, void *user_data);
@@ -59,10 +66,18 @@ bool add_gatt_descriptor_to_gatt_characteristic()
 		return true;
 }
 
-bool set_gatt_characteristic_value(int value)
+bool set_gatt_characteristic_value(int value1, int value2, int value3)
 {
 	int retval;
-	const char GATT_CHARACTERISTIC_VALUE[] = {0, value, 0, 0, 0};
+	union B2I16 conv1;
+	conv1.i = value1;
+
+	union B2I16 conv2;
+	conv2.i = value2;
+
+	union B2I16 conv3;
+	conv3.i = value3;
+	const char GATT_CHARACTERISTIC_VALUE[] = {01, conv1.b[0], conv1.b[1], conv2.b[0], conv2.b[1], conv3.b[0], conv3.b[1]};
 
 	retval = bt_gatt_set_value(gatt_characteristic_handle, GATT_CHARACTERISTIC_VALUE, sizeof(GATT_CHARACTERISTIC_VALUE));
 
