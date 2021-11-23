@@ -3,15 +3,27 @@
 #include "bluetooth/gatt/characteristic.h"
 
 sensor_listener_h hrm_sensor_listener_handle = 0;
-unsigned int hrm_sensor_listener_event_update_interval_ms = 1000;
+sensor_listener_h acce_sensor_listener_handle = 0;
+unsigned int hrm_sensor_listener_event_update_interval_ms = 100;
+unsigned int acce_sensor_listener_event_update_interval_ms = 100;
 
 //static void hrm_sensor_listener_event_callback(sensor_h sensor, sensor_event_s events[], void *user_data);
 
-bool create_hrm_sensor_listener(sensor_h sensor_handle, sensor_event_cb callback, void *user_data)
+bool create_sensor_listener(int mode, sensor_h sensor_handle, sensor_event_cb callback, void *user_data)
 {
 	int retval;
 
-	retval = sensor_create_listener(sensor_handle, &hrm_sensor_listener_handle);
+	switch (mode) {
+	case 0:
+		retval = sensor_create_listener(sensor_handle, &hrm_sensor_listener_handle);
+		break;
+	case 1:
+		retval = sensor_create_listener(sensor_handle, &acce_sensor_listener_handle);
+		break;
+	default:
+		return false;
+	}
+
 
 	if(retval != SENSOR_ERROR_NONE)
 	{
@@ -19,7 +31,7 @@ bool create_hrm_sensor_listener(sensor_h sensor_handle, sensor_event_cb callback
 		return false;
 	}
 
-	if(!set_hrm_sensor_listener_attribute())
+	if(!set_sensor_listener_attribute())
 	{
 		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to set an attribute to control the behavior of a HRM sensor listener.", __FILE__, __func__, __LINE__);
 		return false;
@@ -27,7 +39,17 @@ bool create_hrm_sensor_listener(sensor_h sensor_handle, sensor_event_cb callback
 	else
 		dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in setting an attribute to control the behavior of a HRM sensor listener.", __FILE__, __func__, __LINE__);
 
-	if(!set_hrm_sensor_listener_event_callback(callback, user_data))
+
+	if(!set_sensor_listener_event_callback(mode, callback, user_data))
+	{
+		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to register the callback function to be invoked when sensor events are delivered via a HRM sensor listener.", __FILE__, __func__, __LINE__);
+		return false;
+	}
+	else
+		dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in registering the callback function to be invoked when sensor events are delivered via a HRM sensor listener.", __FILE__, __func__, __LINE__);
+
+
+	if(!set_sensor_listener_event_callback(mode, callback, user_data))
 	{
 		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to register the callback function to be invoked when sensor events are delivered via a HRM sensor listener.", __FILE__, __func__, __LINE__);
 		return false;
@@ -38,7 +60,7 @@ bool create_hrm_sensor_listener(sensor_h sensor_handle, sensor_event_cb callback
 	return true;
 }
 
-bool set_hrm_sensor_listener_attribute()
+bool set_sensor_listener_attribute()
 {
 	int retval;
 
@@ -48,7 +70,7 @@ bool set_hrm_sensor_listener_attribute()
 	*/
 
 	retval = sensor_listener_set_attribute_int(hrm_sensor_listener_handle, SENSOR_ATTRIBUTE_PAUSE_POLICY, SENSOR_PAUSE_NONE);
-
+//	retval = sensor_listener_set_attribute_int(acce_sensor_listener_handle, SENSOR_ATTRIBUTE_PAUSE_POLICY, SENSOR_PAUSE_NONE);
 	/*
 	* The above function makes the listener listen for the sensor data regardless of the display state and the power-save mode.
 	* However, it does not prevent the device from going to the sleep mode.
@@ -64,12 +86,20 @@ bool set_hrm_sensor_listener_attribute()
 		return true;
 }
 
-bool set_hrm_sensor_listener_event_callback(sensor_event_cb callback, void *user_data)
+bool set_sensor_listener_event_callback(int mode, sensor_event_cb callback, void *user_data)
 {
 	/* Register callback */
 	int retval;
-
-	retval = sensor_listener_set_event_cb(hrm_sensor_listener_handle, hrm_sensor_listener_event_update_interval_ms, callback, user_data);
+	switch (mode) {
+	case 0:
+		retval = sensor_listener_set_event_cb(hrm_sensor_listener_handle, hrm_sensor_listener_event_update_interval_ms, callback, user_data);
+		break;
+	case 1:
+		retval = sensor_listener_set_event_cb(acce_sensor_listener_handle, acce_sensor_listener_event_update_interval_ms, callback, user_data);
+		break;
+	default:
+		break;
+	}
 
 	if(retval != SENSOR_ERROR_NONE) {
 		dlog_print(DLOG_DEBUG, LOG_TAG, "%s/%s/%d: Function sensor_listener_set_event_cb() return value = %s", __FILE__, __func__, __LINE__, get_error_message(retval));
@@ -80,11 +110,18 @@ bool set_hrm_sensor_listener_event_callback(sensor_event_cb callback, void *user
 }
 
 
-bool start_hrm_sensor_listener()
+bool start_sensor_listener(int mode)
 {
 	int retval;
 
-	retval = sensor_listener_start(hrm_sensor_listener_handle);
+	switch (mode) {
+	case 0:
+		retval = sensor_listener_start(hrm_sensor_listener_handle);
+		break;
+	case 1:
+		retval = sensor_listener_start(acce_sensor_listener_handle);
+		break;
+	}
 
 	if(retval != SENSOR_ERROR_NONE)
 	{
@@ -95,11 +132,18 @@ bool start_hrm_sensor_listener()
 		return true;
 }
 
-bool stop_hrm_sensor_listener()
+
+bool stop_sensor_listener(int mode)
 {
 	int retval;
-
-	retval = sensor_listener_stop(hrm_sensor_listener_handle);
+	switch (mode) {
+	case 0:
+		retval = sensor_listener_stop(hrm_sensor_listener_handle);
+		break;
+	case 1:
+		retval = sensor_listener_stop(acce_sensor_listener_handle);
+		break;
+	}
 
 	if(retval != SENSOR_ERROR_NONE)
 	{
@@ -110,11 +154,18 @@ bool stop_hrm_sensor_listener()
 		return true;
 }
 
-bool destroy_hrm_sensor_listener()
+
+bool destroy_sensor_listener(int mode)
 {
 	int retval;
-
-	retval = sensor_destroy_listener(hrm_sensor_listener_handle);
+	switch (mode) {
+	case 0:
+		retval = sensor_destroy_listener(hrm_sensor_listener_handle);
+		break;
+	case 1:
+		retval = sensor_destroy_listener(acce_sensor_listener_handle);
+		break;
+	}
 
 	if(retval != SENSOR_ERROR_NONE)
 	{
@@ -124,14 +175,30 @@ bool destroy_hrm_sensor_listener()
 	else
 	{
 		hrm_sensor_listener_handle = 0;
+		acce_sensor_listener_handle = 0;
 		return true;
 	}
 }
 
-bool check_hrm_sensor_listener_is_created()
+
+bool check_sensor_listener_is_created(int mode)
 {
-	if (hrm_sensor_listener_handle != 0)
-		return true;
-	else
+
+	switch (mode) {
+	case 0:
+		if (hrm_sensor_listener_handle != 0)
+				return true;
+			else
+				return false;
+		break;
+	case 1:
+		if (acce_sensor_listener_handle != 0)
+				return true;
+			else
+				return false;
+		break;
+
+	default:
 		return false;
+	}
 }

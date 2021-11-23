@@ -66,7 +66,7 @@ bool add_gatt_descriptor_to_gatt_characteristic()
 		return true;
 }
 
-bool set_gatt_characteristic_value(int value1, int value2, int value3)
+bool set_gatt_characteristic_value(int mode, int value1, int value2, int value3)
 {
 	int retval;
 	union B2I16 conv1;
@@ -77,7 +77,7 @@ bool set_gatt_characteristic_value(int value1, int value2, int value3)
 
 	union B2I16 conv3;
 	conv3.i = value3;
-	const char GATT_CHARACTERISTIC_VALUE[] = {01, conv1.b[0], conv1.b[1], conv2.b[0], conv2.b[1], conv3.b[0], conv3.b[1]};
+	const char GATT_CHARACTERISTIC_VALUE[] = {mode, conv1.b[0], conv1.b[1], conv2.b[0], conv2.b[1], conv3.b[0], conv3.b[1]};
 
 	retval = bt_gatt_set_value(gatt_characteristic_handle, GATT_CHARACTERISTIC_VALUE, sizeof(GATT_CHARACTERISTIC_VALUE));
 

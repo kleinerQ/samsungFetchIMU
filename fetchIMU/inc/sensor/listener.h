@@ -1,12 +1,12 @@
 #ifndef SENSOR_LISTENER_H_
 #define SENSOR_LISTENER_H_
 
-bool create_hrm_sensor_listener(sensor_h, sensor_event_cb, void *);
-bool set_hrm_sensor_listener_attribute();
-bool set_hrm_sensor_listener_event_callback(sensor_event_cb, void *);
-bool start_hrm_sensor_listener();
-bool stop_hrm_sensor_listener();
-bool destroy_hrm_sensor_listener();
-bool check_hrm_sensor_listener_is_created();
+bool create_sensor_listener(int, sensor_h , sensor_event_cb , void *);
+bool set_sensor_listener_attribute();
+bool set_sensor_listener_event_callback(int, sensor_event_cb, void *);
+bool start_sensor_listener(int);
+bool stop_sensor_listener(int);
+bool destroy_sensor_listener(int);
+bool check_sensor_listener_is_created(int);
 
 #endif /* SENSOR_LISTENER_H_ */

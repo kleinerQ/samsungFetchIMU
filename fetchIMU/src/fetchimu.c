@@ -22,8 +22,8 @@ typedef struct appdata {
 
 
 uint16_t RandomManufactureData;
-sensor_type_e sensor_type = SENSOR_ACCELEROMETER;
-sensor_h sensor_handle = 0;
+sensor_h hrm_sensor_handle = 0;
+sensor_h acce_sensor_handle = 0;
 const char *sensor_privilege = "http://tizen.org/privilege/healthinfo";
 
 static void
@@ -155,7 +155,7 @@ create_base_gui(appdata_s *ad)
 
 
 
-bool check_hrm_sensor_is_supported()
+bool check_sensor_is_supported(sensor_type_e sensor_type)
 {
 	int retval;
 	bool supported = false;
@@ -180,11 +180,19 @@ bool check_hrm_sensor_is_supported()
 		return true;
 }
 
-bool initialize_hrm_sensor()
+bool initialize_sensor(int mode, sensor_type_e sensor_type)
 {
 	int retval;
-
-	retval = sensor_get_default_sensor(sensor_type, &sensor_handle);
+	switch (mode) {
+	case 0:
+		retval = sensor_get_default_sensor(sensor_type, &hrm_sensor_handle);
+		break;
+	case 1:
+		retval = sensor_get_default_sensor(sensor_type, &acce_sensor_handle);
+		break;
+	default:
+		return false;
+	}
 
 	if(retval != SENSOR_ERROR_NONE)
 	{
@@ -202,8 +210,42 @@ void heartRate_sensor_listener_event_callback(sensor_h sensor, sensor_event_s ev
 	int value1 = (int)events[0].values[0];
 	int value2 = (int)events[0].values[1];
 	int value3 = (int)events[0].values[2];
-	dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Function sensor_events_callback() output value = %d", __FILE__, __func__, __LINE__, value1);
+	dlog_print(DLOG_INFO, LOG_TAG, "HRM value_count %d", events->value_count);
+	if (value1 < 0)
+	{
+		return;
+	}
 
+	char valueStr[10];
+	sprintf(valueStr, "%d, %d, %d", value1, value2, value3);
+	elm_object_text_set(ad->heartRateLabel, valueStr);
+
+
+
+
+
+	if(!set_gatt_characteristic_value(0, value1, 0, 0))
+		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to update the value of a characteristic's GATT handle.", __FILE__, __func__, __LINE__);
+	else
+		dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in updating the value of a characteristic's GATT handle.", __FILE__, __func__, __LINE__);
+
+	if(!notify_gatt_characteristic_value_changed())
+		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to notify value change of the characteristic to the remote devices which enable a Client Characteristic Configuration Descriptor.", __FILE__, __func__, __LINE__);
+	else
+		dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in notifying value change of the characteristic to the remote devices which enable a Client Characteristic Configuration Descriptor.", __FILE__, __func__, __LINE__);
+
+
+}
+
+
+
+void acce_sensor_listener_event_callback(sensor_h sensor, sensor_event_s events[], void *user_data) {
+
+	appdata_s *ad = user_data;
+	int value1 = (int)events[0].values[0];
+	int value2 = (int)events[0].values[1];
+	int value3 = (int)events[0].values[2];
+	dlog_print(DLOG_INFO, LOG_TAG, "ACCE value_count  %d", events->value_count);
 //	if (value < 0)
 //	{
 //		value = 0;
@@ -218,7 +260,7 @@ void heartRate_sensor_listener_event_callback(sensor_h sensor, sensor_event_s ev
 
 
 
-	if(!set_gatt_characteristic_value(value1, value2, value3))
+	if(!set_gatt_characteristic_value(1, value1, value2, value3))
 		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to update the value of a characteristic's GATT handle.", __FILE__, __func__, __LINE__);
 	else
 		dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in updating the value of a characteristic's GATT handle.", __FILE__, __func__, __LINE__);
@@ -247,7 +289,7 @@ void request_sensor_permission_response_callback(ppm_call_cause_e cause, ppm_req
 			/* Update UI and start accessing protected functionality */
 			dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: The user granted permission to use a sensor privilege for an indefinite period of time.", __FILE__, __func__, __LINE__);
 
-			if(!initialize_hrm_sensor())
+			if(!initialize_sensor(0, SENSOR_HRM))
 			{
 				dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to get the handle for the default sensor of a HRM sensor.", __FILE__, __func__, __LINE__);
 				ui_app_exit();
@@ -255,7 +297,17 @@ void request_sensor_permission_response_callback(ppm_call_cause_e cause, ppm_req
 			else
 				dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in getting the handle for the default sensor of a HRM sensor.", __FILE__, __func__, __LINE__);
 
-			if(!create_hrm_sensor_listener(sensor_handle, heartRate_sensor_listener_event_callback, user_data))
+			if(!initialize_sensor(1, SENSOR_ACCELEROMETER))
+			{
+				dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to get the handle for the default sensor of a HRM sensor.", __FILE__, __func__, __LINE__);
+				ui_app_exit();
+			}
+			else
+				dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in getting the handle for the default sensor of a HRM sensor.", __FILE__, __func__, __LINE__);
+
+
+
+			if(!create_sensor_listener(0, hrm_sensor_handle, heartRate_sensor_listener_event_callback, user_data))
 			{
 				dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to create a HRM sensor listener.", __FILE__, __func__, __LINE__);
 				ui_app_exit();
@@ -263,13 +315,32 @@ void request_sensor_permission_response_callback(ppm_call_cause_e cause, ppm_req
 			else
 				dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in creating a HRM sensor listener.", __FILE__, __func__, __LINE__);
 
-			if(!start_hrm_sensor_listener())
+
+			if(!create_sensor_listener(1, acce_sensor_handle, acce_sensor_listener_event_callback, user_data))
+			{
+				dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to create a HRM sensor listener.", __FILE__, __func__, __LINE__);
+				ui_app_exit();
+			}
+			else
+				dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in creating a HRM sensor listener.", __FILE__, __func__, __LINE__);
+
+
+			if(!start_sensor_listener(0))
 			{
 				dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to start observing the sensor events regarding a HRM sensor listener.", __FILE__, __func__, __LINE__);
 				ui_app_exit();
 			}
 			else
 				dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in starting observing the sensor events regarding a HRM sensor listener.", __FILE__, __func__, __LINE__);
+
+			if(!start_sensor_listener(1))
+			{
+				dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to start observing the sensor events regarding a HRM sensor listener.", __FILE__, __func__, __LINE__);
+				ui_app_exit();
+			}
+			else
+				dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in starting observing the sensor events regarding a HRM sensor listener.", __FILE__, __func__, __LINE__);
+
 			break;
 		case PRIVACY_PRIVILEGE_MANAGER_REQUEST_RESULT_DENY_FOREVER:
 			/* Show a message and terminate the application */
@@ -321,9 +392,10 @@ bool check_and_request_sensor_permission(void *user_data) {
 			/* Update UI and start accessing protected functionality */
 			dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: The application has permission to use a sensor privilege.", __FILE__, __func__, __LINE__);
 
-			if(!check_hrm_sensor_listener_is_created())
+
+			if(!check_sensor_listener_is_created(0))
 			{
-				if(!initialize_hrm_sensor())
+				if(!initialize_sensor(0, SENSOR_HRM))
 				{
 					dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to get the handle for the default sensor of a HRM sensor.", __FILE__, __func__, __LINE__);
 					return false;
@@ -331,7 +403,7 @@ bool check_and_request_sensor_permission(void *user_data) {
 				else
 					dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in getting the handle for the default sensor of a HRM sensor.", __FILE__, __func__, __LINE__);
 
-				if(!create_hrm_sensor_listener(sensor_handle, heartRate_sensor_listener_event_callback, user_data))
+				if(!create_sensor_listener(0, hrm_sensor_handle, heartRate_sensor_listener_event_callback, user_data))
 				{
 					dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to create a HRM sensor listener.", __FILE__, __func__, __LINE__);
 					return false;
@@ -339,11 +411,36 @@ bool check_and_request_sensor_permission(void *user_data) {
 				else
 					dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in creating a HRM sensor listener.", __FILE__, __func__, __LINE__);
 
-				if(!start_hrm_sensor_listener())
+				if(!start_sensor_listener(0))
 					dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to start observing the sensor events regarding a HRM sensor listener.", __FILE__, __func__, __LINE__);
 				else
 					dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in starting observing the sensor events regarding a HRM sensor listener.", __FILE__, __func__, __LINE__);
 			}
+
+			if(!check_sensor_listener_is_created(1))
+			{
+				if(!initialize_sensor(1, SENSOR_ACCELEROMETER))
+				{
+					dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to get the handle for the default sensor of a HRM sensor.", __FILE__, __func__, __LINE__);
+					return false;
+				}
+				else
+					dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in getting the handle for the default sensor of a HRM sensor.", __FILE__, __func__, __LINE__);
+
+				if(!create_sensor_listener(1, acce_sensor_handle, acce_sensor_listener_event_callback, user_data))
+				{
+					dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to create a HRM sensor listener.", __FILE__, __func__, __LINE__);
+					return false;
+				}
+				else
+					dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in creating a HRM sensor listener.", __FILE__, __func__, __LINE__);
+
+				if(!start_sensor_listener(1))
+					dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to start observing the sensor events regarding a HRM sensor listener.", __FILE__, __func__, __LINE__);
+				else
+					dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in starting observing the sensor events regarding a HRM sensor listener.", __FILE__, __func__, __LINE__);
+			}
+
 			return true;
 		case PRIVACY_PRIVILEGE_MANAGER_CHECK_RESULT_DENY:
 			/* Show a message and terminate the application */
@@ -392,7 +489,15 @@ app_create(void *data)
 
 	create_base_gui(ad);
 
-	if(!check_hrm_sensor_is_supported())
+	if(!check_sensor_is_supported(0))
+	{
+		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: A HRM sensor is not supported.", __FILE__, __func__, __LINE__);
+		return false;
+	}
+	else
+		dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: A HRM sensor is supported.", __FILE__, __func__, __LINE__);
+
+	if(!check_sensor_is_supported(1))
 	{
 		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: A HRM sensor is not supported.", __FILE__, __func__, __LINE__);
 		return false;
@@ -558,13 +663,22 @@ app_terminate(void *data)
 	/* Release all resources. */
 	int retval;
 
-	if(check_hrm_sensor_listener_is_created())
+	if(check_sensor_listener_is_created(0))
 	{
-		if(!destroy_hrm_sensor_listener())
+		if(!destroy_sensor_listener(0))
 			dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to release all the resources allocated for a HRM sensor listener.", __FILE__, __func__, __LINE__);
 		else
 			dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in releasing all the resources allocated for a HRM sensor listener.", __FILE__, __func__, __LINE__);
 	}
+
+	if(check_sensor_listener_is_created(1))
+	{
+		if(!destroy_sensor_listener(1))
+			dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to release all the resources allocated for a HRM sensor listener.", __FILE__, __func__, __LINE__);
+		else
+			dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in releasing all the resources allocated for a HRM sensor listener.", __FILE__, __func__, __LINE__);
+	}
+
 
 	if(!destroy_gatt_service())
 		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to destroy the GATT handle of service.", __FILE__, __func__, __LINE__);
