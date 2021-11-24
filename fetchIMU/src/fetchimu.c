@@ -209,20 +209,15 @@ void heartRate_sensor_listener_event_callback(sensor_h sensor, sensor_event_s ev
 
 	appdata_s *ad = user_data;
 	int value1 = (int)events[0].values[0];
-	int value2 = (int)events[0].values[1];
-	int value3 = (int)events[0].values[2];
 	dlog_print(DLOG_INFO, LOG_TAG, "HRM value_count %d", events->value_count);
 	if (value1 < 0)
 	{
 		return;
 	}
 
-	char valueStr[10];
-	sprintf(valueStr, "%d, %d, %d", value1, value2, value3);
-	elm_object_text_set(ad->heartRateLabel, valueStr);
-
-
-
+//	char valueStr[10];
+//	sprintf(valueStr, "%d, %d, %d", value1, value2, value3);
+//	elm_object_text_set(ad->heartRateLabel, valueStr);
 
 
 	if(!set_gatt_characteristic_value(0, value1, 0, 0))

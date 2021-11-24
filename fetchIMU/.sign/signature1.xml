@@ -4,13 +4,13 @@
 <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"></SignatureMethod>
 <Reference URI="author-signature.xml">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>dQ6cM5lB5HtVNFphFe5SaF+Ukwo6CAqApSqVaZfHgWyGvrSkYXPAjqm8twNPzm3EMfmE9HFlS5Nt
-mDcdM5nApg==</DigestValue>
+<DigestValue>zwVCvm3/DPy/tlaOasHHHf3INR50GALaQuDyfFv1Zbl6t7LWl1+G3JtoUFGoh0igfMLHN4HCBeG7
+dV4MU8ZIhw==</DigestValue>
 </Reference>
 <Reference URI="bin%2Ffetchimu">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>ro6NZ7j/H1UEAWoaRlP/BxGVo12ccuIU9Y6InQDpLPfmjcJqgglEK3Ic7kRn9cdgllL7583nfSL1
-cXmf4NdG3w==</DigestValue>
+<DigestValue>rq6tOY/Lp93aB8DlGT9wuPqY3lQhP7LvM2tsbeRqhITVOp40WeY8MF44qYcGavoUm2w1KyXGKqmz
+piVs69HR4A==</DigestValue>
 </Reference>
 <Reference URI="shared%2Fres%2Ffetchimu.png">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
@@ -32,11 +32,11 @@ GyvKX9Snig==</DigestValue>
 </Reference>
 </SignedInfo>
 <SignatureValue>
-CfRTbp8R3DYkOvj+70kqnGxICMVBGMLqdhxSH/MKrtEIRIwwLrrdjRCuMasZJNoy8NiHhXuON6pl
-cIb3Z3SJECbIPySMjjUpnI4msH8OPwJ70vcJuRjHeLGfeylIj2Gcqk2LZLDDEbHwL+Iq5oGMGkin
-FDH7kGBXoLgKBmm+i9Dg7y67tA4+dvH/Vz0bkf5hQ+GhUTFchmr2HJhhEGF/q9jlMRcgn5VnnPPB
-bTmPwGwlpGXEE3Wpn6A7to5BGZaxUDyaWJSI2lJ9v1372J13i7FhteCoQM9ZrJZBGXUYlL0d3S/3
-SWx8lcC9gDSLPpT0jFKjYPfMEQMDK3EsPFqtqA==
+mIGG0cnsa6F1WcTNHkaRBVzaZTIbRRf8emiilP7SKbHJEfeCtFBHrSN8zlWVsqgrcdOaB6td1szk
+K+WnGYrNhNWenoHm3ncNU1dcymLwm861CJmda8zj+EhJo7fJxB53maXNfYxZiiNiIvU8u++p2urt
+E0xf7ZX9eLJ6qJN5Zgmu9cr3VioP6Tb0pzl1Pb/QpfTAAvyd1Qmjed1iRxJe4DpkcVIVvuXCHY68
+nFFQnUULpdks7U99fIuj6ypS/D1OrMWiULiHLieY/8JP6zRo24W+nMSbaPc0NIP9hIki2hST1rcF
+rHxZB8XNyzZvbHkofv831TOFqa6I/nFkScT2Wg==
 </SignatureValue>
 <KeyInfo>
 <X509Data>
