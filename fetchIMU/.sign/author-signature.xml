@@ -4,8 +4,8 @@
 <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"></SignatureMethod>
 <Reference URI="bin%2Ffetchimu">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>iCfzIzQS0Ak7KcqurGmhO1FkAKEy3VwX3EDdlL+cNKFm1dmKGqcaH5aox7Y6TNXrSLiyJAJGvV5l
-wW6Vz1DCLQ==</DigestValue>
+<DigestValue>ro6NZ7j/H1UEAWoaRlP/BxGVo12ccuIU9Y6InQDpLPfmjcJqgglEK3Ic7kRn9cdgllL7583nfSL1
+cXmf4NdG3w==</DigestValue>
 </Reference>
 <Reference URI="shared%2Fres%2Ffetchimu.png">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
@@ -14,8 +14,8 @@ bNc/wgCuGg==</DigestValue>
 </Reference>
 <Reference URI="tizen-manifest.xml">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>2LXzmYW/AjdEQWy+vmuiuemb+zdsetOXaNdcliQSeln/rCkn6JvyMDrlUdnOdn9PrMC3TMkwl60X
-J2tjmdeQrQ==</DigestValue>
+<DigestValue>OeljOjW9HX+uhadsFBZNe6quyshobzDF8IBVWJJCiyzxhUJXmDSOmMF0l5SmrkOpiQDfjH0fnYuq
+Cmo3Bv9KPQ==</DigestValue>
 </Reference>
 <Reference URI="#prop">
 <Transforms>
@@ -27,11 +27,11 @@ QY10fG1EWQ==</DigestValue>
 </Reference>
 </SignedInfo>
 <SignatureValue>
-QbX6U5ZTvNnpITkIS5WXDwtFH/naN0KBtY9yScZcBswkiUhRQr/n8OHGkF4ASAHnAN+O9ONhCh0F
-kIMRnhlLgR6Mm2uMANZCis68YhLxSiJs0b4EYe2JZxgqJEtbEGQ9Qgp8HTrvgrKibenC9i4fhdBw
-evhYDMJjGfSI680kcrq/f6HhiJXjGMud1liNjP2rkGjgqRy5f7fcZnrpDlI+/Y7t0gWXG4n4IuNh
-crAYf7k4LlI9Yee8U/aZ6zVRyDerjwrI5JVrBfhE0W5gxd10gQU/6rgV3W4MxRHLyNojDMRi0MxX
-bhiTRjFolE0oFRdeJcBKQEpLx6EqRpVAbyt4Gg==
+fe+LrFTTgAndVjfqI5tFyqwB53RZEeho+0cYhg9i23u7Ix+qwVJiRRAkvpJBiRqI3eVtlTAT5Koz
+BQRDIUfAQjXk3wLCfK06bwbGcMtG33DjEdooox+ouVWCBstpGXHp8lC4mNohrO8M8r43ckYZCxPP
+jVMpTAtHEIQppaQGCeDKhTY2+wn7M7N+pjr6b4k4OloDx+4vhQ3VYVWmxi0te7HIvH1ufhzaRh8w
+fz6Y9ME5DX5pCFYWqEPlosXWzq+vJjrULkwrTH991k15MRiRIFuHHOKdkeg2mBln7snLhdT0x5+v
+U8W5s6Wia9pO+eajKNnO5zT75PTrkFC5R5DkIw==
 </SignatureValue>
 <KeyInfo>
 <X509Data>

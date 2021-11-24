@@ -1,6 +1,7 @@
 #include "fetchimu.h"
 #include <privacy_privilege_manager.h>
-
+#include <device/power.h>
+#include <tizen.h>
 #include "bluetooth/gatt/server.h"
 #include "bluetooth/gatt/service.h"
 #include "bluetooth/gatt/sensorService.h"
@@ -46,7 +47,7 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info)
 void button_clicked_callback(void *data, Evas_Object *obj, void *event_info)
 {
 	dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Shut down button is clicked.", __FILE__, __func__, __LINE__);
-//	ui_app_exit();
+	ui_app_exit();
 }
 
 static void
@@ -242,22 +243,20 @@ void heartRate_sensor_listener_event_callback(sensor_h sensor, sensor_event_s ev
 void acce_sensor_listener_event_callback(sensor_h sensor, sensor_event_s events[], void *user_data) {
 
 	appdata_s *ad = user_data;
-	int value1 = (int)events[0].values[0];
-	int value2 = (int)events[0].values[1];
-	int value3 = (int)events[0].values[2];
-	dlog_print(DLOG_INFO, LOG_TAG, "ACCE value_count  %d", events->value_count);
+	int16_t value1 = (events[0].values[0] / (9.8 / 2048.0)) ;
+	int16_t value2 = (events[0].values[1] / (9.8 / 2048.0)) ;
+	int16_t value3 = (events[0].values[2] / (9.8 / 2048.0)) ;
+	dlog_print(DLOG_INFO, LOG_TAG, "ACCE value:  %d, %d %d", value1, value2, value3);
 //	if (value < 0)
 //	{
 //		value = 0;
 //		return;
 //	}
 
-	char valueStr[10];
+
+	char valueStr[100];
 	sprintf(valueStr, "%d, %d, %d", value1, value2, value3);
 	elm_object_text_set(ad->heartRateLabel, valueStr);
-
-
-
 
 
 	if(!set_gatt_characteristic_value(1, value1, value2, value3))
@@ -770,5 +769,7 @@ main(int argc, char *argv[])
 		dlog_print(DLOG_ERROR, LOG_TAG, "app_main() is failed. err = %d", ret);
 	}
 
+	device_power_request_lock(POWER_LOCK_DISPLAY, 0);
+	device_power_request_lock(POWER_LOCK_CPU, 0);
 	return ret;
 }

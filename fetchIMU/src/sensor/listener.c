@@ -4,8 +4,8 @@
 
 sensor_listener_h hrm_sensor_listener_handle = 0;
 sensor_listener_h acce_sensor_listener_handle = 0;
-unsigned int hrm_sensor_listener_event_update_interval_ms = 100;
-unsigned int acce_sensor_listener_event_update_interval_ms = 100;
+unsigned int hrm_sensor_listener_event_update_interval_ms = 1000;
+unsigned int acce_sensor_listener_event_update_interval_ms = 1000;
 
 //static void hrm_sensor_listener_event_callback(sensor_h sensor, sensor_event_s events[], void *user_data);
 
@@ -31,7 +31,7 @@ bool create_sensor_listener(int mode, sensor_h sensor_handle, sensor_event_cb ca
 		return false;
 	}
 
-	if(!set_sensor_listener_attribute())
+	if(!set_sensor_listener_attribute(mode))
 	{
 		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to set an attribute to control the behavior of a HRM sensor listener.", __FILE__, __func__, __LINE__);
 		return false;
@@ -60,7 +60,7 @@ bool create_sensor_listener(int mode, sensor_h sensor_handle, sensor_event_cb ca
 	return true;
 }
 
-bool set_sensor_listener_attribute()
+bool set_sensor_listener_attribute(int mode)
 {
 	int retval;
 
@@ -69,8 +69,20 @@ bool set_sensor_listener_attribute()
 	* if the display is switched off or the device goes to the power-save mode. You can override such behavior:
 	*/
 
-	retval = sensor_listener_set_attribute_int(hrm_sensor_listener_handle, SENSOR_ATTRIBUTE_PAUSE_POLICY, SENSOR_PAUSE_NONE);
-//	retval = sensor_listener_set_attribute_int(acce_sensor_listener_handle, SENSOR_ATTRIBUTE_PAUSE_POLICY, SENSOR_PAUSE_NONE);
+	switch (mode) {
+	case 0:
+		retval = sensor_listener_set_option(hrm_sensor_listener_handle,  SENSOR_OPTION_ALWAYS_ON);
+		retval = sensor_listener_set_attribute_int(hrm_sensor_listener_handle, SENSOR_ATTRIBUTE_PAUSE_POLICY, SENSOR_PAUSE_NONE);
+		break;
+
+	case 1:
+		retval = sensor_listener_set_option(acce_sensor_listener_handle,  SENSOR_OPTION_ALWAYS_ON);
+		retval = sensor_listener_set_attribute_int(acce_sensor_listener_handle, SENSOR_ATTRIBUTE_PAUSE_POLICY, SENSOR_PAUSE_NONE);
+		break;
+	default:
+		return false;
+	}
+	//	retval = sensor_listener_set_attribute_int(acce_sensor_listener_handle, SENSOR_ATTRIBUTE_PAUSE_POLICY, SENSOR_PAUSE_NONE);
 	/*
 	* The above function makes the listener listen for the sensor data regardless of the display state and the power-save mode.
 	* However, it does not prevent the device from going to the sleep mode.
