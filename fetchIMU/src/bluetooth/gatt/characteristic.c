@@ -91,6 +91,36 @@ bool set_gatt_characteristic_value(int mode, int16_t value1, int16_t value2, int
 		return true;
 }
 
+bool set_gatt_characteristic_value_ByArray(int mode, int16_t * dataPtr, int length)
+{
+	if (length > 0) {
+		int retval;
+		char *GATT_CHARACTERISTIC_VALUE = malloc( sizeof(char) * ( 2 * length + 1) );
+		*GATT_CHARACTERISTIC_VALUE = 1;
+
+		for (int i = 0; i < length; i++) {
+			union B2I16 conv;
+			conv.i = *(dataPtr + i);
+			*(GATT_CHARACTERISTIC_VALUE + 2 * i + 1) = conv.b[0];
+			*(GATT_CHARACTERISTIC_VALUE + 2 * i + 2) = conv.b[1];
+		}
+
+		retval = bt_gatt_set_value(gatt_characteristic_handle, GATT_CHARACTERISTIC_VALUE, sizeof(2 * length + 1));
+
+		free(GATT_CHARACTERISTIC_VALUE);
+		if(retval != BT_ERROR_NONE)
+		{
+			dlog_print(DLOG_DEBUG, LOG_TAG, "%s/%s/%d: Function bt_gatt_set_value() return value = %s", __FILE__, __func__, __LINE__, get_error_message(retval));
+			return false;
+		}
+		else
+			return true;
+	}else
+		return true;
+
+}
+
+
 bool notify_gatt_characteristic_value_changed()
 {
 	int retval;

@@ -11,6 +11,7 @@
 #include "bluetooth/gatt/sensorCharacteristicDescriptor.h"
 #include "bluetooth/le/advertiser.h"
 #include "sensor/listener.h"
+#include "ArrayOperation.h"
 typedef struct appdata {
 	Evas_Object *win;
 	Evas_Object *conform;
@@ -25,6 +26,8 @@ typedef struct appdata {
 uint16_t RandomManufactureData;
 sensor_h hrm_sensor_handle = 0;
 sensor_h acce_sensor_handle = 0;
+CTypeArray acceDataArray;
+
 const char *sensor_privilege = "http://tizen.org/privilege/healthinfo";
 
 static void
@@ -220,6 +223,7 @@ void heartRate_sensor_listener_event_callback(sensor_h sensor, sensor_event_s ev
 //	elm_object_text_set(ad->heartRateLabel, valueStr);
 
 
+
 	if(!set_gatt_characteristic_value(0, value1, 0, 0))
 		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to update the value of a characteristic's GATT handle.", __FILE__, __func__, __LINE__);
 	else
@@ -253,6 +257,14 @@ void acce_sensor_listener_event_callback(sensor_h sensor, sensor_event_s events[
 	sprintf(valueStr, "%d, %d, %d", value1, value2, value3);
 	elm_object_text_set(ad->heartRateLabel, valueStr);
 
+	Array_Add(&acceDataArray, value1);
+	Array_Add(&acceDataArray, value2);
+	Array_Add(&acceDataArray, value3);
+	if (acceDataArray.size == 90) {
+
+	}else {
+
+	}
 
 	if(!set_gatt_characteristic_value(1, value1, value2, value3))
 		dlog_print(DLOG_ERROR, LOG_TAG, "%s/%s/%d: Failed to update the value of a characteristic's GATT handle.", __FILE__, __func__, __LINE__);
@@ -623,6 +635,9 @@ app_create(void *data)
 	else
 		dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in starting advertising with passed advertiser and advertising parameters.", __FILE__, __func__, __LINE__);
 
+
+	Array_Init(&acceDataArray);
+
 	return true;
 }
 
@@ -700,6 +715,7 @@ app_terminate(void *data)
 	else
 		dlog_print(DLOG_INFO, LOG_TAG, "%s/%s/%d: Succeeded in releasing all resources of the Bluetooth API.", __FILE__, __func__, __LINE__);
 
+	Array_Delete(&acceDataArray, acceDataArray.size);
 }
 
 static void
